@@ -117,4 +117,3 @@ tibble1[which(tibble1$Treatment=='placebo' &
 
 # This is where we had reached at the end of 05.05.2022
 # They should probably have better commenting on them
-#
