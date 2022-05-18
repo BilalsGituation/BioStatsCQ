@@ -1,4 +1,4 @@
-pacman::p_load(tidyverse, wrappedtools, ggplot2, Rmisc)
+pacman::p_load(tidyverse, wrappedtools, ggplot2, Rmisc, sjmisc, stringr)
 
 n_group <- 10
 rawdata <- tibble(group=sample(x = c('c','t'),
@@ -76,4 +76,39 @@ ggplot(TestResults, aes(group,measure))+
        x="Test Group") # Please open or export this graph. It is much nicer than it looks!
 
 
-t.test(rnorm(20,120,15), mu = 100, alternative = 'greater')
+#t.test(rnorm(20,120,15), mu = 100, alternative = 'greater')
+
+# Next thing we want to do is create some data with several factors and one dependent variable
+
+# So, let's say our factors are mouse (random), treatment (fixed, 3 categories), treatment side (fixed, 2 categories)
+# and we have calculated our independent variable c("Density", expression("Synapses/"*mu~"m"^3))
+
+# Let's assume that we already know that the factor of whether the mouse is female or male is insignificant
+
+set.seed(5555)
+n_group=50
+TestResults <- tibble(side=sample(x = c('left','right'),
+                                       size = n_group*3,
+                                       replace = T),
+                      mouse=sample(x = c('f1','f2','m3','f4','m5','m9','f7','f8','m11', 'f12','f13','m14','m16','m17','f18'), # Only 15 of 21 mice survived :(
+                                   size = n_group*3,
+                                   replace = T),
+                      SynDns=runif(n_group*3,0,20))
+
+
+pattern <- c('f1','f4','m14','m17','f8')
+pattern2 <- c('f12','m5','m9','m3','f18')
+
+# Thank you Andreas Busjahn (my teacher) for providing me with this super-succinct
+# value-matching block to fill my treatment variable based on which of these fictional
+# mice the density value is from
+
+TestResults <- mutate(TestResults,
+                      treatment = case_when(mouse %in% pattern~"overexpression",
+                             mouse %in% pattern2~"knockout",
+                             TRUE~"control"))
+
+# My to-do list for this script:
+# -Two-way ANOVA testing synaptic density between and across factors
+
+# -Graph: plot 2bar clusters (left/right), dots (density), facets (treatment), maybe mice on a feature or we explore and find something better than this
