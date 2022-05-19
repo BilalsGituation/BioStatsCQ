@@ -1,4 +1,4 @@
-pacman::p_load(tidyverse, wrappedtools, ggplot2, Rmisc, sjmisc, stringr)
+pacman::p_load(tidyverse, wrappedtools, ggplot2, Rmisc, sjmisc, stringr, lme4, broom, AICcmodavg, dplyr, WRS2)
 
 n_group <- 10
 rawdata <- tibble(group=sample(x = c('c','t'),
@@ -38,20 +38,20 @@ meansd(y)
 diff(t3$estimate)
 
 # solo work just to demonstrate that I can do multivariate statistics
-set.seed(8066) # Randomly generated
-TestResults <- tibble(group=sample(x = c('control','group1','group2'),
-                               size = n_group*3,
-                               replace = T),
-                  measure=rnorm(n = n_group*3))
+#set.seed(8066) # Randomly generated
+#TestResults <- tibble(group=sample(x = c('control','group1','group2'),
+#                               size = n_group*3,
+#                               replace = T),
+#                  measure=rnorm(n = n_group*3))
 
 # Our categorical independent variable has 3 categories,
 # so we are going to do a one-way ANOVA of TestResults
 # and find out whether our data say that
 # measure changes significantly when group changes
 
-MVTest1 <- aov(measure ~ group, data = TestResults)
+#MVTest1 <- aov(measure ~ group, data = TestResults)
 
-summary(MVTest1) # The p-value from the seed-generated data was 0.354, suggesting that there was no significant effect of group on measure
+#summary(MVTest1) # The p-value from the seed-generated data was 0.354, suggesting that there was no significant effect of group on measure
 
 #ggplot(TestResults, aes(group, measure))+
 #       geom_boxplot(fill = 'yellow')+
@@ -99,7 +99,7 @@ TestResults <- tibble(side=sample(x = c('left','right'),
 pattern <- c('f1','f4','m14','m17','f8')
 pattern2 <- c('f12','m5','m9','m3','f18')
 
-# Thank you Andreas Busjahn (my teacher) for providing me with this super-succinct
+# Thank you Andreas Busjahn for providing me with this super-succinct
 # value-matching block to fill my treatment variable based on which of these fictional
 # mice the density value is from
 
@@ -108,7 +108,122 @@ TestResults <- mutate(TestResults,
                              mouse %in% pattern2~"knockout",
                              TRUE~"control"))
 
-# My to-do list for this script:
-# -Two-way ANOVA testing synaptic density between and across factors
+# http://www.sthda.com/english/wiki/normality-test-in-r
 
-# -Graph: plot 2bar clusters (left/right), dots (density), facets (treatment), maybe mice on a feature or we explore and find something better than this
+shapiro.test(TestResults$SynDns)
+
+# Shapiro-Wilk normality test
+#
+# data:  TestResults$SynDns
+# W = 0.93455, p-value = 2.088e-06
+#
+# The probability that the distribution of Synaptic Density is not normal due to
+# chance is lower than 0.0001%
+# So we scrap our parametric analysis below and replace it with something that shows I know what I'm doing!
+# https://cran.r-project.org/web/packages/WRS2/vignettes/WRS2.pdf
+
+# We will then use the t2way method in WRS2, after a read of the article (p18)
+# and mcp2atm method will be used for posthoc
+
+# Let's learn incrementally instead of attempting a mixed multivariate study, since the aov method seems much more straighforward. I still have to learn the R here.
+# Factors: treatment and side, both fixed.
+# Using the trimmed mean to do small-sample non-parametric analysis (20%), which appears to be standard for robust non-parametric multivariate statistics
+
+TestResults$side <- factor(TestResults$side) # Convert independent variables to factors
+TestResults$treatment <- factor(TestResults$treatment) # so we don't get the "attempt to select less than one element" Error # possibly should be an ordered variable but we can commit that out later
+TestResults$mouse <- factor(TestResults$mouse) # rerunning the next line caused no error with this line + prev 2
+GeneTestFix <- t2way(formula = SynDns ~ side*treatment, tr=0.2, data = TestResults)
+
+GeneTestFix
+
+# If you set the same seed before creating the TestResults set, you should find no significant difference in Synaptic density with respect to treatment or treatment side:
+# > GeneTestFix
+# Call:
+#   t2way(formula = SynDns ~ side * treatment, data = TestResults,
+#         tr = 0.2)
+#
+#                 value p.value
+# side           0.5574   0.460
+# treatment      2.4609   0.311
+# side:treatment 3.8292   0.168
+
+# Let's show the public that we can interpret posthoc outputs
+PostGene2way <- mcp2atm(SynDns ~ side * treatment, data = TestResults)
+PostGene2way
+
+# > PostGene2way
+# Call:
+#   mcp2atm(formula = SynDns ~ side * treatment, data = TestResults)
+#
+#                     psihat  ci.lower ci.upper p-value
+# side1            -3.25530 -12.05703  5.54644 0.45949
+# treatment1        1.94302  -7.46309 11.34913 0.60246
+# treatment2        5.61832  -4.20955 15.44619 0.15852
+# treatment3        3.67530  -3.88519 11.23579 0.23697
+# side1:treatment1  5.85406  -3.55205 15.26017 0.12462
+# side1:treatment2  7.41115  -2.41672 17.23902 0.06638
+# side1:treatment3  1.55709  -6.00340  9.11758 0.61443
+
+# It's to be expected that when we produce the random distributions for treatments
+# using the exact same random number generation process, then plug them into observations
+# indiscriminately, that we would be returned insignificant p values for the difference
+# both BETWEEN and AMONG factors. We can tell from the results that
+
+
+
+# My to-do list for this script:
+# -Three-way ANOVA testing synaptic density between and across factors
+# (Used https://www.scribbr.com/statistics/anova-in-r/ for this. It's a bit more comprehensive than my current experience or my goals for this GitHub script)
+
+# -Graph: plot 2bar clusters (left/right), dots (density), facets (treatment), maybe mice on a feature or we explore and find something better than this.
+
+# Attempt at the Three-way mixed
+
+# Factor nesting check
+# Side (fixed) is nested within mouse (random)
+# Treatment is fixed and separate
+
+# lmer is a method for mixed linear effects modelling
+
+# leaving this in a commit in case it all works after the factor assignments
+
+GeneTestMix <- lmer(SynDns ~ (1|mouse:side) + side + treatment, data = TestResults, offset = NULL)
+summary(GeneTestMix)
+confint(GeneTestMix)
+
+#omputing profile confidence intervals ...
+#                           2.5 %    97.5 %
+#sig01                   0.0000000  2.336902
+#.sigma                   5.2829388  6.706488
+#(Intercept)              7.2638161 11.883622
+#sideright               -0.9829882  3.050065
+#treatmentknockout       -2.7473931  2.201071
+#treatmentoverexpression -4.1044970  1.206441
+
+# I'm really not sure what the sideright variable(?) is. I need to check this site out on revisit
+# and google "interpret lmer output" again.
+# This is not how I remember SPSS output of a random mixed ANOVA and we may find tomorrow that I've coded it wrong
+# https://campus.datacamp.com/courses/hierarchical-and-mixed-effects-models-in-r/linear-mixed-effect-models?ex=7
+
+# Output includes this at the end
+#Correlation of Fixed Effects:
+  #           (Intr) sdrght trtmntk
+#sideright   -0.552
+#trtmntknckt -0.700  0.101          # KO (row)
+#trtmntvrxpr -0.638  0.059  0.566  # OE (row)
+
+
+# let's check out the density against just treatment
+
+ggplot(TestResults, aes(treatment,SynDns))+
+  ggbeeswarm::geom_beeswarm(alpha=.3)+
+  stat_summary(fun.data=mean_cl_normal)+
+  scale_y_continuous(name = expression(paste("Synaptic Density(boutons/",mu,"m/",m^3,")", sep=""))#,
+                     #breaks = seq(-2.2, 2.2, 0.25)
+                     )+
+  ylab('mean\u00b1CI')+
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  labs(title="Box plot + Dot plot",
+       subtitle="The effect of the Independent Variable 'Experimental Group'\non the dependent variable 'Test Result'",
+       caption="Source: set.seed(5555)",
+       x="Test Group")
