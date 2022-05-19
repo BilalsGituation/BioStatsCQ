@@ -1,4 +1,4 @@
-# This document was created in order to explore the surface of multivariate
+# This document was created in order to explore the surface of multifactor
 # stats. I will move onto some plotting afterwards
 
 # So, let's use a couple of random generation strategies, rather than one,
@@ -7,7 +7,7 @@
 # IMPORTANT: I am clearing my RStudio environment of all objects before I begin
 # writing
 
-set.seed(5975)
+set.seed(9975)
 n_group=100
 TestResults <- tibble(side=sample(x = c('left','right'),
                                   size = n_group*3,
@@ -42,7 +42,9 @@ ggplot(TestResults, aes(treatment,SynDns))+
   theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
   labs(title="Box plot + Dot plot",
        subtitle="The effect of the Independent Variable 'Experimental Group'\non the dependent variable 'Test Result'",
-       caption="Source: set.seed(5975)",
+       caption="Source: set.seed(9975)",
        x="Test Group")
 
 # The distributions look the same with seed 5975. I am going to play around with the value randomiser after this push
+# Edit: I would prefer to advance with this seed
+

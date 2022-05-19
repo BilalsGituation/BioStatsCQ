@@ -38,7 +38,7 @@ meansd(x)
 meansd(y)
 diff(t3$estimate)
 
-# solo work just to demonstrate that I can do multivariate statistics
+# solo work just to demonstrate that I can do multifactor statistics
 #set.seed(8066) # Randomly generated
 #TestResults <- tibble(group=sample(x = c('control','group1','group2'),
 #                               size = n_group*3,
@@ -126,9 +126,9 @@ shapiro.test(TestResults$SynDns)
 # We will then use the t2way method in WRS2, after a read of the article (p18)
 # and mcp2atm method will be used for posthoc
 
-# Let's learn incrementally instead of attempting a mixed multivariate study, since the aov method seems much more straighforward. I still have to learn the R here.
+# Let's learn incrementally instead of attempting a mixed multifactor study, since the aov method seems much more straighforward. I still have to learn the R here.
 # Factors: treatment and side, both fixed.
-# Using the trimmed mean to do small-sample non-parametric analysis (20%), which appears to be standard for robust non-parametric multivariate statistics
+# Using the trimmed mean to do small-sample non-parametric analysis (20%), which appears to be standard for robust non-parametric multifactor statistics
 
 TestResults$side <- factor(TestResults$side) # Convert independent variables to factors
 TestResults$treatment <- factor(TestResults$treatment) # so we don't get the "attempt to select less than one element" Error # possibly should be an ordered variable but we can commit that out later
