@@ -80,7 +80,7 @@ ggplot(TestResults, aes(group,measure))+
 
 # Next thing we want to do is create some data with several factors and one dependent variable
 
-# So, let's say our factors are mouse (random), treatment (fixed, 3 categories), treatment side (fixed, 2 categories)
+# So, let's say our factors are mouse (random), treatment (fixed, 3 categories), sample side (fixed, 2 categories)
 # and we have calculated our independent variable c("Density", expression("Synapses/"*mu~"m"^3))
 
 # Let's assume that we already know that the factor of whether the mouse is female or male is insignificant
@@ -136,7 +136,7 @@ GeneTestFix <- t2way(formula = SynDns ~ side*treatment, tr=0.2, data = TestResul
 
 GeneTestFix
 
-# If you set the same seed before creating the TestResults set, you should find no significant difference in Synaptic density with respect to treatment or treatment side (or their interaction:
+# If you set the same seed before creating the TestResults set, you should find no significant difference in Synaptic density with respect to treatment or sample side (or their interaction:
 # > GeneTestFix
 # Call:
 #   t2way(formula = SynDns ~ side * treatment, data = TestResults,
@@ -146,6 +146,9 @@ GeneTestFix
 # side           0.5574   0.460
 # treatment      2.4609   0.311
 # side:treatment 3.8292   0.168
+
+# the effect of the interaction is strongest, but the independent variables and
+# their interaction all do not have a significant effect on synaptic density
 
 # Let's show the public that we can interpret posthoc outputs
 PostGene2way <- mcp2atm(SynDns ~ side * treatment, data = TestResults)
