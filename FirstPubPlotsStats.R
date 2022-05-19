@@ -136,7 +136,7 @@ GeneTestFix <- t2way(formula = SynDns ~ side*treatment, tr=0.2, data = TestResul
 
 GeneTestFix
 
-# If you set the same seed before creating the TestResults set, you should find no significant difference in Synaptic density with respect to treatment or treatment side:
+# If you set the same seed before creating the TestResults set, you should find no significant difference in Synaptic density with respect to treatment or treatment side (or their interaction:
 # > GeneTestFix
 # Call:
 #   t2way(formula = SynDns ~ side * treatment, data = TestResults,
@@ -167,14 +167,12 @@ PostGene2way
 # It's to be expected that when we produce the random distributions for treatments
 # using the exact same random number generation process, then plug them into observations
 # indiscriminately, that we would be returned insignificant p values for the difference
-# both BETWEEN and AMONG factors. We can tell from the results that
+# both BETWEEN and AMONG factors. We can tell that from the results, as well as the simple plot below
 
 
 
 # My to-do list for this script:
 # -Three-way ANOVA testing synaptic density between and across factors
-# (Used https://www.scribbr.com/statistics/anova-in-r/ for this. It's a bit more comprehensive than my current experience or my goals for this GitHub script)
-
 # -Graph: plot 2bar clusters (left/right), dots (density), facets (treatment), maybe mice on a feature or we explore and find something better than this.
 
 # Attempt at the Three-way mixed
@@ -184,35 +182,6 @@ PostGene2way
 # Treatment is fixed and separate
 
 # lmer is a method for mixed linear effects modelling
-
-# leaving this in a commit in case it all works after the factor assignments
-
-GeneTestMix <- lmer(SynDns ~ (1|mouse:side) + side + treatment, data = TestResults, offset = NULL)
-summary(GeneTestMix)
-confint(GeneTestMix)
-
-#omputing profile confidence intervals ...
-#                           2.5 %    97.5 %
-#sig01                   0.0000000  2.336902
-#.sigma                   5.2829388  6.706488
-#(Intercept)              7.2638161 11.883622
-#sideright               -0.9829882  3.050065
-#treatmentknockout       -2.7473931  2.201071
-#treatmentoverexpression -4.1044970  1.206441
-
-# I'm really not sure what the sideright variable(?) is. I need to check this site out on revisit
-# and google "interpret lmer output" again.
-# This is not how I remember SPSS output of a random mixed ANOVA and we may find tomorrow that I've coded it wrong
-# https://campus.datacamp.com/courses/hierarchical-and-mixed-effects-models-in-r/linear-mixed-effect-models?ex=7
-
-# Output includes this at the end
-#Correlation of Fixed Effects:
-  #           (Intr) sdrght trtmntk
-#sideright   -0.552
-#trtmntknckt -0.700  0.101          # KO (row)
-#trtmntvrxpr -0.638  0.059  0.566  # OE (row)
-
-
 # let's check out the density against just treatment
 
 ggplot(TestResults, aes(treatment,SynDns))+
