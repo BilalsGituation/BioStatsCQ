@@ -7,6 +7,38 @@
 # IMPORTANT: I am clearing my RStudio environment of all objects before I begin
 # writing
 
+# ALSO IMPORTANT: the goal here is to interpret the stats that come out
+
+# Limitations:
+# - Data were entirely fabricated, this isn't about expression of an actual
+#    gene. Therefore further analyses can't be done
+#       - And we therefore can only make "conclusions" on what comes out of the
+#           "study spreadsheet/tibble"
+# - I haven't worked out how to represent all the variables in a 3-way mixed
+#     analysis
+# -
+
+# What I learned:
+# - R/Tidyverse functions: runif, case_when, aov
+# - ggplot functions: facet_grid,
+# - WRS2 package (see vignette, mcp2am and t2way)
+# - from fixed issues in variable type designation in R
+
+# Improvements log since finishing first day:
+# - Bug fixed, needed pacman block
+
+pacman::p_load(tidyverse,
+               wrappedtools,
+               ggplot2,
+               Rmisc,
+               sjmisc,
+               #stringr,
+               lme4,
+               # broom,
+               # AICcmodavg,
+               dplyr,
+               WRS2)
+
 set.seed(1000)
 n_group=100
 TestResults <- tibble(side=sample(x = c('left','right'),
@@ -94,6 +126,14 @@ PostGene2wayREV
 # side1:treatment2 -0.61348  -7.65572  6.42877 0.83384
 # side1:treatment3  6.54606  -0.67120 13.76332 0.03086 # Over here
 
+# So, within the treatments "control" and "overexpression", the var "side" has
+# an effect making the synaptic density different
+
+# can I say this alternatively?
+
+# Advice: this is really messy to interpret. Separate analyses should be done on each factor if you get this, ideally!
+
+
 ggplot(TestResults, aes(side,SynDns))+
   ggbeeswarm::geom_beeswarm(alpha=.3)+
   stat_summary(fun.data=mean_cl_normal)+
@@ -121,9 +161,3 @@ ggplot(TestResults, aes(side,SynDns))+
   )
 
 
-# So, within the treatments "control" and "overexpression", the var "side" has
-# an effect making the synaptic density different
-
-# can I say this alternatively?
-
-# Advice: this is really messy to interpret. Separate analyses should be done on each factor if you get this, ideally!
