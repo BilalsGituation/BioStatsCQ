@@ -46,3 +46,56 @@ dplyr::filter(peng, Sex!='NA') %>%
        #shape="Island",
        )#+
  # labs(colour = 'Clutch Completion')
+
+names(peng)
+# 1] "studyName"           "Sample Number"       "Species"             "Region"
+# [5] "Island"              "Stage"               "Individual ID"       "Clutch Completion"
+# [9] "Date Egg"            "Culmen Length (mm)"  "Culmen Depth (mm)"   "Flipper Length (mm)"
+# [13] "Body Mass (g)"       "Sex"                 "Delta 15 N (o/oo)"   "Delta 13 C (o/oo)"
+# [17] "Comments"
+
+# gonna try and visualise the mass and dimension data of the penguins after first
+# representing some categorical data relationships
+
+# So first I want a stacked bar plot of region stacked on island, because I have no idea
+# whether the species are indeed region-specific and I want to know how the geography works
+# to do that thoroughly (and practice)
+
+peng %>%
+  ggplot(aes(x = Region, fill = Island))+
+  geom_bar()
+
+# Now I know that all of the islands are in the Anvers region and have git-pushed my
+# first stacked bar plot!
+
+# Next I want one of species stacked onto island
+
+dplyr::filter(peng, Sex!='NA') %>%
+        ggplot(aes(x = Sex, fill = Species))+
+        geom_bar(position="stack", stat="count")+
+        facet_grid(~ Island)
+
+# Bonus: we can now easily compare how many male and female penguins were
+# sampled from each island, which won't be as easy to see in any plot involving
+# points, and certainly not before we make it look nicer, which we'll have a go
+# at doing to the graph "g1"
+
+# gone back to make this so we can know that the facets are Island names
+peng$Island <- factor(peng$Island, labels = c("Biscoe\nIsland", "Dream\nIsland", "Torgersen\nIsland"))
+# I would find this more informative since the facets as a set aren't named, like you see on the bottom
+# x-axis of the next graph
+
+# Now let's do the same to sort that overly-wide legend out
+peng$Species <- factor(peng$Species, labels = c("Adelie (P. adeliae)", "Chinstrap (P. antarctica)", "Gentoo (P. papua)"))
+
+
+dplyr::filter(peng, Sex!='NA') %>%
+  ggplot(aes(x = Sex, fill = Species))+
+  geom_bar(position="stack", stat="count")+
+  facet_grid(~ Island)+
+  labs(y = "Penguins sampled (n)", colour = "Penguin Species")+
+  scale_fill_manual(values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
+  scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M")) # shortened the facet x axis labels
+
+
+
