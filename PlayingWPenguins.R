@@ -91,11 +91,17 @@ peng$Species <- factor(peng$Species, labels = c("Adelie (P. adeliae)", "Chinstra
 
 dplyr::filter(peng, Sex!='NA') %>%
   ggplot(aes(x = Sex, fill = Species))+
-  geom_bar(position="stack", stat="count")+
+  geom_bar(aes(fill = Species), position="stack")+
+  geom_text(aes(label = after_stat('count')), stat = 'count', position = 'stack', vjust= 2)+
   facet_grid(~ Island)+
   labs(y = "Penguins sampled (n)", colour = "Penguin Species")+ # fixed this, see prev. commit for
   scale_fill_manual(name = "Penguin Species",values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
-  scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M"))+ # shortened the facet x axis labels
-  geom_text(Species, aes(label = after_stat('count')), stat = 'count', position = 'stack')
+  scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M"))#+ # shortened the facet x axis labels
 
+# need to call it. tried but should revisit:
+# https://stackoverflow.com/questions/62522673/adding-counts-and-percentages
+# https://blog.albertkuo.me/post/2022-01-04-reordering-geom-col-and-geom-bar-by-count-or-value/
+# https://ggplot2.tidyverse.org/reference/geom_text.html
+# https://plotnine.readthedocs.io/en/stable/tutorials/miscellaneous-show-counts-on-a-stacked-bar-plot.html
+# https://statisticsglobe.com/add-count-labels-on-top-of-ggplot2-barchart-in-r
 
