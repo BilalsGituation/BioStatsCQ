@@ -78,7 +78,7 @@ dplyr::filter(peng, Sex!='NA') %>%
 # Bonus: we can now easily compare how many male and female penguins were
 # sampled from each island, which won't be as easy to see in any plot involving
 # points, and certainly not before we make it look nicer, which we'll have a go
-# at doing to the graph "g1"
+# at doing to the graph made by the previous block
 
 # gone back to make this so we can know that the facets are Island names
 peng$Island <- factor(peng$Island, labels = c("Biscoe\nIsland", "Dream\nIsland", "Torgersen\nIsland"))
@@ -93,9 +93,9 @@ dplyr::filter(peng, Sex!='NA') %>%
   ggplot(aes(x = Sex, fill = Species))+
   geom_bar(position="stack", stat="count")+
   facet_grid(~ Island)+
-  labs(y = "Penguins sampled (n)", colour = "Penguin Species")+
-  scale_fill_manual(values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
-  scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M")) # shortened the facet x axis labels
-
+  labs(y = "Penguins sampled (n)", colour = "Penguin Species")+ # fixed this, see prev. commit for
+  scale_fill_manual(name = "Penguin Species",values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
+  scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M"))+ # shortened the facet x axis labels
+  geom_text(Species, aes(label = after_stat('count')), stat = 'count', position = 'stack')
 
 
