@@ -91,15 +91,22 @@ peng$Species <- factor(peng$Species, labels = c("Adelie (P. adeliae)", "Chinstra
 Numbers <- peng %>%
              count(Island, Sex, Species)
 
-dplyr::filter(peng, Sex!='NA') %>%
-  ggplot(aes(x = Sex, fill = Species))+
+peng <-dplyr::filter(peng, Sex!='NA')
+
+# Logging off because holiday, time away from screen.
+# we are on the geom_rect line to try and make our facets nicer
+
+peng %>%
+  ggplot(aes(x = Sex, fill = Species)) +
+  #geom_rect(peng, mapping = aes(fill = Island), xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf)+
   geom_bar(aes(fill = Species), position="stack", stat = 'count')+
   geom_text(aes(label=..count..),stat = 'count',position='stack', vjust= 2)+ # https://stackoverflow.com/questions/63653351/how-to-use-stat-count-to-label-a-bar-chart-with-counts-or-percentages-in-ggplo this is the one! thank you for my almost-nice graph!
   facet_grid(~ Island)+
   labs(y = "Penguins sampled (n)", colour = "Penguin Species")+ # fixed this, see prev. commit for
   scale_fill_manual(name = "Penguin Species",values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
-  scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M"))#+ # shortened the facet x axis labels
-
+  scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M"))# + # shortened the facet x axis labels
+# Next thing I want to tackle is that the facets themselves could look nicer. We'll add a background after to contrast with what we have
+  #theme(strip.background=element_rect(fill=Island))
 
 
 
