@@ -88,15 +88,21 @@ peng$Island <- factor(peng$Island, labels = c("Biscoe\nIsland", "Dream\nIsland",
 # Now let's do the same to sort that overly-wide legend out
 peng$Species <- factor(peng$Species, labels = c("Adelie (P. adeliae)", "Chinstrap (P. antarctica)", "Gentoo (P. papua)"))
 
+Numbers <- peng %>%
+             count(Island, Sex, Species)
 
 dplyr::filter(peng, Sex!='NA') %>%
   ggplot(aes(x = Sex, fill = Species))+
-  geom_bar(aes(fill = Species), position="stack")+
-  geom_text(aes(label = after_stat('count')), stat = 'count', position = 'stack', vjust= 2)+
+  geom_bar(aes(fill = Species), position="stack", stat = 'identity')+
+  geom_text(aes(label=Numbers$n), stat='identity', position='stack', vjust= 2)+
   facet_grid(~ Island)+
   labs(y = "Penguins sampled (n)", colour = "Penguin Species")+ # fixed this, see prev. commit for
   scale_fill_manual(name = "Penguin Species",values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
   scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M"))#+ # shortened the facet x axis labels
+
+
+
+
 
 # need to call it. tried but should revisit:
 # https://stackoverflow.com/questions/62522673/adding-counts-and-percentages
@@ -104,4 +110,33 @@ dplyr::filter(peng, Sex!='NA') %>%
 # https://ggplot2.tidyverse.org/reference/geom_text.html
 # https://plotnine.readthedocs.io/en/stable/tutorials/miscellaneous-show-counts-on-a-stacked-bar-plot.html
 # https://statisticsglobe.com/add-count-labels-on-top-of-ggplot2-barchart-in-r
+
+# This is a class exercise but I'm gonna do it here:
+# Do a GLM on the penguin data to see if you can use other variables to predict the sex of a penguin based on other factors
+
+# We know that we can't predict sex based on any geographical factors.
+# We know that the Gentoo penguins have higher body mass
+
+# Let's visualise (left alone for now)
+
+dplyr::filter(peng, Sex!='NA') %>%
+  ggplot(aes(Sex, `Culmen Length (mm)`, fill=Species))+
+  stat_boxplot(geom = "errorbar", width=0.5, position = position_dodge(1)) +
+  geom_boxplot(position = position_dodge(1))+
+  scale_fill_manual(values = wes_palette("IsleofDogs1"))+
+  #geom_dotplot(binaxis='y', dotsize=1, position = 'dodge')+
+  #geom_point(alpha=0.4)+
+  ggbeeswarm::geom_beeswarm(aes(shape = `Clutch Completion`,color = Island, fill=Species, group = Species))+
+  scale_color_manual(values = wes_palette("Darjeeling1"))+
+  stat_summary(fun.data=mean_cl_normal)+
+  scale_y_continuous(name = 'Culmen Length (mm)')+
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  labs(title="Body Masses of Penguins by Sex", # Update your titles
+       subtitle="further differentiated by their island, their species\nand whether their clutch is complete",
+       caption="Source: palmerpenguins",
+       x="Sex",
+       shape="Species",
+  )
+
+# Visually, it looks like flipper length is more of a predictor of island or species than sex
 
