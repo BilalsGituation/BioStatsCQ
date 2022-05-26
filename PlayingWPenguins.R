@@ -93,8 +93,8 @@ Numbers <- peng %>%
 
 dplyr::filter(peng, Sex!='NA') %>%
   ggplot(aes(x = Sex, fill = Species))+
-  geom_bar(aes(fill = Species), position="stack", stat = 'identity')+
-  geom_text(aes(label=Numbers$n), stat='identity', position='stack', vjust= 2)+
+  geom_bar(aes(fill = Species), position="stack", stat = 'count')+
+  geom_text(aes(label=..count..),stat = 'count',position='stack', vjust= 2)+ # https://stackoverflow.com/questions/63653351/how-to-use-stat-count-to-label-a-bar-chart-with-counts-or-percentages-in-ggplo this is the one! thank you for my almost-nice graph!
   facet_grid(~ Island)+
   labs(y = "Penguins sampled (n)", colour = "Penguin Species")+ # fixed this, see prev. commit for
   scale_fill_manual(name = "Penguin Species",values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
