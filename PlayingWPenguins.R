@@ -27,26 +27,6 @@ ggplot(aes(Sex, `Body Mass (g)`))+
        x="Sex")+
   labs(colour = 'Clutch Completion')
 
-# Further developed, practiced a bit with visualising several variables clearly
-# (This isn't to do statistics on)
-dplyr::filter(peng, Sex!='NA') %>%
-  ggplot(aes(Sex, `Body Mass (g)`, fill=Species))+
-  geom_boxplot(show.legend = T)+
-  scale_fill_manual(values = wes_palette("IsleofDogs1"))+
-  #geom_point(alpha=0.4)+
-  ggbeeswarm::geom_beeswarm(aes(alpha = `Clutch Completion`,color = Island, shape = Species))+
-  scale_color_manual(values = wes_palette("Darjeeling1"))+
-  stat_summary(fun.data=mean_cl_normal)+
-  scale_y_continuous(name = 'Body mass (g)')+
-  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
-  labs(title="Body Masses of Penguins by Sex", # Update your titles
-       subtitle="further differentiated by their island, their species\nand whether their clutch is complete",
-       caption="Source: palmerpenguins",
-       x="Sex",
-       #shape="Island",
-       )#+
- # labs(colour = 'Clutch Completion')
-
 names(peng)
 # 1] "studyName"           "Sample Number"       "Species"             "Region"
 # [5] "Island"              "Stage"               "Individual ID"       "Clutch Completion"
@@ -71,9 +51,9 @@ peng %>%
 # Next I want one of species stacked onto island
 
 dplyr::filter(peng, Sex!='NA') %>%
-        ggplot(aes(x = Sex, fill = Species))+
-        geom_bar(position="stack", stat="count")+
-        facet_grid(~ Island)
+  ggplot(aes(x = Sex, fill = Species))+
+  geom_bar(position="stack", stat="count")+
+  facet_grid(~ Island)
 
 # Bonus: we can now easily compare how many male and female penguins were
 # sampled from each island, which won't be as easy to see in any plot involving
@@ -89,9 +69,11 @@ peng$Island <- factor(peng$Island, labels = c("Biscoe\nIsland", "Dream\nIsland",
 peng$Species <- factor(peng$Species, labels = c("Adelie (P. adeliae)", "Chinstrap (P. antarctica)", "Gentoo (P. papua)"))
 
 Numbers <- peng %>%
-             count(Island, Sex, Species)
+  count(Island, Sex, Species)
 
 peng <-dplyr::filter(peng, Sex!='NA')
+peng <-dplyr::filter(peng, `Clutch Completion`!='NA')
+peng <-dplyr::filter(peng, Species!='NA')
 
 # Logging off because holiday, time away from screen.
 # we are on the geom_rect line to try and make our facets nicer
@@ -106,7 +88,7 @@ peng %>%
   scale_fill_manual(name = "Penguin Species",values = wes_palette("IsleofDogs1"))+ # this palette nicely differentiated 3 colours before
   scale_x_discrete(labels=c("FEMALE" = "F", "MALE" = "M"))# + # shortened the facet x axis labels
 # Next thing I want to tackle is that the facets themselves could look nicer. We'll add a background after to contrast with what we have
-  #theme(strip.background=element_rect(fill=Island))
+#theme(strip.background=element_rect(fill=Island))
 
 
 
@@ -117,6 +99,62 @@ peng %>%
 # https://ggplot2.tidyverse.org/reference/geom_text.html
 # https://plotnine.readthedocs.io/en/stable/tutorials/miscellaneous-show-counts-on-a-stacked-bar-plot.html
 # https://statisticsglobe.com/add-count-labels-on-top-of-ggplot2-barchart-in-r
+
+
+# Further developed, practiced a bit with visualising several variables clearly
+# (This isn't to do statistics on)
+
+# 27/05/2022 going to try to separate the points and stat summmaries, so that they
+# are on top of the island boxplot that they came from
+
+peng %>%
+  ggplot(aes(Sex, `Body Mass (g)`))+
+  geom_boxplot(aes(fill=Species), show.legend = T)+
+  scale_fill_manual(values = wes_palette("GrandBudapest2"))+
+  #geom_point(alpha=0.4)+
+  geom_point(
+    aes(#x = Species,
+        alpha = `Clutch Completion`,
+        colour = Island,
+        shape = Species,
+        group = Species
+        ), position=position_jitterdodge()
+    )+
+  scale_alpha_discrete(range=c(0.4, 1))+ # This is cool, lets you make a scalar representation motif(?)
+  # into more like "These are the n categories of transparency as shown in legend"
+
+  # What I learned about geom_beeswarm:
+  # While it is neat, there is no position argument because geom_beeswarm is itself a usage of geom_point
+  # with the argument position="beeswarm"
+
+  # Now this has become an ok job of representing an independent variable against 4 factors.
+  # We can see what we did in our stacked bars, that Adelle penguins were studied on all 3 islands,
+  # Chinstraps were only found on Dream Island, and Gentoos were only found on Biscoe Island.
+
+  # I have to commit these notes then delete them
+
+
+  #geom_point(aes(alpha = `Clutch Completion`,color = Island, shape = Species, group = Species))+
+  scale_color_manual(values = wes_palette("Darjeeling1"))+
+  #stat_summary(colour = "magenta", fun.data=mean_cl_normal)+
+  scale_y_continuous(name = 'Body mass (g)')+
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  labs(title="Body Masses of Penguins by Sex", # Update your titles
+       subtitle="further differentiated by their island, their species\nand whether their clutch is complete",
+       caption="Source: palmerpenguins",
+       x="Sex",
+       #shape="Island",
+       )+
+   theme(panel.background = element_rect(fill = "white" ,colour = 'black'),
+         panel.grid.major = element_line(size = 0.25, linetype = 'dashed',
+                                         colour = "grey19"),
+         panel.grid.minor = element_line(size = 0.125, linetype = 'dotted',
+                                         colour = "grey19"))
+
+  #legend(x='right', legend = c("Island","Clutch Completion","Species"), pt.cex = 1.2)
+
+ # labs(colour = 'Clutch Completion')
+
 
 # This is a class exercise but I'm gonna do it here:
 # Do a GLM on the penguin data to see if you can use other variables to predict the sex of a penguin based on other factors
